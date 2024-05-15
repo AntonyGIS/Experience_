@@ -32,6 +32,8 @@
             "esri/views/MapView",
             "esri/WebMap"
         ], function (Map, MapView, WebMap) {
+            console.log("Modules loaded");
+
             const webMap = new WebMap({
                 portalItem: {
                     id: "99059745ff81489695dbb6dcb27bb070"
@@ -44,19 +46,31 @@
             });
 
             view.when(() => {
+                console.log("Map and View are ready");
+
                 document.getElementById("generateLinkButton").onclick = function () {
+                    console.log("Button clicked");
+
                     let visibleLayers = webMap.layers.filter(layer => layer.visible).map(layer => layer.id).join(";");
+                    console.log("Visible layers:", visibleLayers);
+
                     let shareLink = `${window.location.href.split('?')[0]}?showLayers=${encodeURIComponent(visibleLayers)}`;
+                    console.log("Generated share link:", shareLink);
+
                     document.getElementById("shareLink").value = shareLink;
                 };
 
                 const urlParams = new URLSearchParams(window.location.search);
                 const showLayersParam = urlParams.get('showLayers');
+                console.log("URL parameters:", showLayersParam);
 
                 if (showLayersParam) {
                     const layerIds = showLayersParam.split(';').map(decodeURIComponent);
+                    console.log("Layer IDs to show:", layerIds);
+
                     webMap.layers.forEach(layer => {
                         layer.visible = layerIds.includes(layer.id);
+                        console.log(`Layer ${layer.id} visibility set to ${layer.visible}`);
                     });
                 }
             });
@@ -64,6 +78,7 @@
     </script>
 </body>
 </html>
+
 
 
 
