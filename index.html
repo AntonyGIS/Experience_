@@ -6,8 +6,8 @@
     <title>Layer Visibility URL Generator</title>
     <script src="https://js.arcgis.com/4.19/"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        #viewDiv {
+            height: 400px;
         }
         #generateLinkButton {
             padding: 10px 20px;
@@ -24,36 +24,28 @@
 <body>
     <input type="text" id="shareLink" placeholder="Generated URL will appear here" readonly>
     <button id="generateLinkButton">Generate Shareable Link</button>
+    <div id="viewDiv"></div>
 
     <script>
         require([
             "esri/Map",
             "esri/views/MapView",
-            "esri/layers/FeatureLayer",
-            "esri/portal/PortalItem"
-        ], function (Map, MapView, FeatureLayer, PortalItem) {
-            const map = new Map({
-                basemap: "topo-vector"
+            "esri/WebMap"
+        ], function (Map, MapView, WebMap) {
+            const webMap = new WebMap({
+                portalItem: {
+                    id: "99059745ff81489695dbb6dcb27bb070"
+                }
             });
 
             const view = new MapView({
                 container: "viewDiv",
-                map: map,
-                center: [-82.137, 29.187],
-                zoom: 10
+                map: webMap
             });
-
-            const layers = [
-                new FeatureLayer({ url: "https://services1.arcgis.com/0MgPBoZpy1Db2sAl/arcgis/rest/services/Parcels_Copy_Zonin_FLUM_/FeatureServer/0" }),
-                new FeatureLayer({ url: "https://services1.arcgis.com/0MgPBoZpy1Db2sAl/arcgis/rest/services/Parcels_Marion_County/FeatureServer/0" }),
-                new FeatureLayer({ url: "https://services1.arcgis.com/0MgPBoZpy1Db2sAl/arcgis/rest/services/RAC_22_Locations/FeatureServer/0" })
-            ];
-
-            layers.forEach(layer => map.add(layer));
 
             view.when(() => {
                 document.getElementById("generateLinkButton").onclick = function () {
-                    let visibleLayers = layers.filter(layer => layer.visible).map(layer => layer.url).join(";");
+                    let visibleLayers = webMap.layers.filter(layer => layer.visible).map(layer => layer.id).join(";");
                     let shareLink = `${window.location.href.split('?')[0]}?showLayers=${encodeURIComponent(visibleLayers)}`;
                     document.getElementById("shareLink").value = shareLink;
                 };
@@ -62,9 +54,9 @@
                 const showLayersParam = urlParams.get('showLayers');
 
                 if (showLayersParam) {
-                    const layerUrls = showLayersParam.split(';').map(decodeURIComponent);
-                    layers.forEach(layer => {
-                        layer.visible = layerUrls.includes(layer.url);
+                    const layerIds = showLayersParam.split(';').map(decodeURIComponent);
+                    webMap.layers.forEach(layer => {
+                        layer.visible = layerIds.includes(layer.id);
                     });
                 }
             });
@@ -72,6 +64,7 @@
     </script>
 </body>
 </html>
+
 
 
 
