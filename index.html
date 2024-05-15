@@ -14,70 +14,55 @@
             font-size: 16px;
             margin-top: 10px;
         }
-        #shareLink {
-            width: 100%;
-            padding: 10px;
-            font-size: 16px;
-        }
     </style>
 </head>
 <body>
+    <div id="viewDiv"></div>
+    <div id="layerListDiv"></div>
     <input type="text" id="shareLink" placeholder="Generated URL will appear here" readonly>
     <button id="generateLinkButton">Generate Shareable Link</button>
-    <div id="viewDiv"></div>
 
     <script>
         require([
             "esri/Map",
             "esri/views/MapView",
-            "esri/WebMap"
-        ], function (Map, MapView, WebMap) {
-            console.log("Modules loaded");
-
-            const webMap = new WebMap({
-                portalItem: {
-                    id: "99059745ff81489695dbb6dcb27bb070"
-                }
+            "esri/layers/FeatureLayer",
+            "esri/widgets/LayerList"
+        ], function (Map, MapView, FeatureLayer, LayerList) {
+            const map = new Map({
+                basemap: "topo-vector"
             });
 
             const view = new MapView({
                 container: "viewDiv",
-                map: webMap
+                map: map,
+                center: [-82.137, 29.187],
+                zoom: 10
             });
 
-            view.when(() => {
-                console.log("Map and View are ready");
+            const layers = [
+                new FeatureLayer({ url: "https://services1.arcgis.com/0MgPBoZpy1Db2sAl/arcgis/rest/services/Parcels_Copy_Zonin_FLUM_/FeatureServer/0" }),
+                new FeatureLayer({ url: "https://services1.arcgis.com/0MgPBoZpy1Db2sAl/arcgis/rest/services/Parcels_Marion_County/FeatureServer/0" }),
+                new FeatureLayer({ url: "https://services1.arcgis.com/0MgPBoZpy1Db2sAl/arcgis/rest/services/RAC_22_Locations/FeatureServer/0" })
+            ];
 
-                document.getElementById("generateLinkButton").onclick = function () {
-                    console.log("Button clicked");
+            layers.forEach(layer => map.add(layer));
 
-                    let visibleLayers = webMap.layers.filter(layer => layer.visible).map(layer => layer.id).join(";");
-                    console.log("Visible layers:", visibleLayers);
-
-                    let shareLink = `${window.location.href.split('?')[0]}?showLayers=${encodeURIComponent(visibleLayers)}`;
-                    console.log("Generated share link:", shareLink);
-
-                    document.getElementById("shareLink").value = shareLink;
-                };
-
-                const urlParams = new URLSearchParams(window.location.search);
-                const showLayersParam = urlParams.get('showLayers');
-                console.log("URL parameters:", showLayersParam);
-
-                if (showLayersParam) {
-                    const layerIds = showLayersParam.split(';').map(decodeURIComponent);
-                    console.log("Layer IDs to show:", layerIds);
-
-                    webMap.layers.forEach(layer => {
-                        layer.visible = layerIds.includes(layer.id);
-                        console.log(`Layer ${layer.id} visibility set to ${layer.visible}`);
-                    });
-                }
+            const layerList = new LayerList({
+                view: view,
+                container: "layerListDiv"
             });
+
+            document.getElementById("generateLinkButton").onclick = function () {
+                let visibleLayers = layers.filter(layer => layer.visible).map(layer => layer.url).join(";");
+                let shareLink = `${window.location.href.split('?')[0]}?showLayers=${encodeURIComponent(visibleLayers)}`;
+                document.getElementById("shareLink").value = shareLink;
+            };
         });
     </script>
 </body>
 </html>
+
 
 
 
