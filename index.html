@@ -53,11 +53,17 @@
         require([
             "esri/Map",
             "esri/views/MapView",
-            "esri/widgets/LayerList",
-            "esri/layers/FeatureLayer"
-        ], function (Map, MapView, LayerList, FeatureLayer) {
-            const map = new Map({
-                basemap: "topo-vector"
+            "esri/WebMap",
+            "esri/widgets/LayerList"
+        ], function (Map, MapView, WebMap, LayerList) {
+            const webMapId = "99059745ff81489695dbb6dcb27bb070";
+            const apiKey = "AAPK7b0da9d44a0242cdac84322818797967XznKuUGOHqSBXtWPRx8UkUbf856rRbcc4nAE0Y9jtx44FCPeHlgDaJGngilAOZGI";
+
+            const map = new WebMap({
+                portalItem: {
+                    id: webMapId
+                },
+                apiKey: apiKey
             });
 
             const view = new MapView({
@@ -66,14 +72,6 @@
                 center: [-82.137, 29.187],
                 zoom: 10
             });
-
-            const layers = [
-                new FeatureLayer({ url: "https://services1.arcgis.com/0MgPBoZpy1Db2sAl/arcgis/rest/services/Parcels_Copy_Zonin_FLUM_/FeatureServer/0" }),
-                new FeatureLayer({ url: "https://services1.arcgis.com/0MgPBoZpy1Db2sAl/arcgis/rest/services/Parcels_Marion_County/FeatureServer/0" }),
-                new FeatureLayer({ url: "https://services1.arcgis.com/0MgPBoZpy1Db2sAl/arcgis/rest/services/RAC_22_Locations/FeatureServer/0" })
-            ];
-
-            layers.forEach(layer => map.add(layer));
 
             const layerList = new LayerList({
                 view: view
@@ -84,8 +82,8 @@
             });
 
             document.getElementById("generateLinkButton").onclick = function () {
-                let visibleLayers = layers.filter(layer => layer.visible).map(layer => layer.url).join(";");
-                let shareLink = `${window.location.href.split('?')[0]}?showLayers=${encodeURIComponent(visibleLayers)}`;
+                const visibleLayers = map.layers.filter(layer => layer.visible).map(layer => layer.url).join(";");
+                const shareLink = `${window.location.href.split('?')[0]}?showLayers=${encodeURIComponent(visibleLayers)}`;
                 document.getElementById("shareLink").value = shareLink;
             };
         });
