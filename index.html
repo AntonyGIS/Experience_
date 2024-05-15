@@ -6,13 +6,40 @@
     <title>Layer Visibility URL Generator</title>
     <script src="https://js.arcgis.com/4.19/"></script>
     <style>
-        #viewDiv {
-            height: 400px;
+        html, body, #viewDiv {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
         }
         #generateLinkButton {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
             padding: 10px 20px;
             font-size: 16px;
-            margin-top: 10px;
+        }
+        #shareLink {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            padding: 10px;
+            font-size: 16px;
+            width: 80%;
+        }
+        #layerListDiv {
+            position: absolute;
+            top: 100px;
+            left: 10px;
+            z-index: 10;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
         }
     </style>
 </head>
@@ -26,9 +53,9 @@
         require([
             "esri/Map",
             "esri/views/MapView",
-            "esri/layers/FeatureLayer",
-            "esri/widgets/LayerList"
-        ], function (Map, MapView, FeatureLayer, LayerList) {
+            "esri/widgets/LayerList",
+            "esri/layers/FeatureLayer"
+        ], function (Map, MapView, LayerList, FeatureLayer) {
             const map = new Map({
                 basemap: "topo-vector"
             });
@@ -49,8 +76,11 @@
             layers.forEach(layer => map.add(layer));
 
             const layerList = new LayerList({
-                view: view,
-                container: "layerListDiv"
+                view: view
+            });
+
+            view.ui.add(layerList, {
+                position: "top-right"
             });
 
             document.getElementById("generateLinkButton").onclick = function () {
@@ -62,6 +92,7 @@
     </script>
 </body>
 </html>
+
 
 
 
