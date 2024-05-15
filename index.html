@@ -6,18 +6,22 @@
     <title>Layer Visibility URL Generator</title>
     <script src="https://js.arcgis.com/4.19/"></script>
     <style>
-        #viewDiv {
-            height: 400px;
+        body {
+            font-family: Arial, sans-serif;
         }
         #generateLinkButton {
             padding: 10px 20px;
             font-size: 16px;
             margin-top: 10px;
         }
+        #shareLink {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+        }
     </style>
 </head>
 <body>
-    <div id="viewDiv"></div>
     <input type="text" id="shareLink" placeholder="Generated URL will appear here" readonly>
     <button id="generateLinkButton">Generate Shareable Link</button>
 
@@ -27,31 +31,35 @@
             "esri/views/MapView",
             "esri/layers/FeatureLayer"
         ], function (Map, MapView, FeatureLayer) {
-            const map = new Map({
-                basemap: "topo-vector"
-            });
+            // This will get the map from the parent window (Experience Builder)
+            const parentWindow = window.parent;
+            const mapView = parentWindow.__activeMapView;
+            const map = mapView.map;
 
-            const view = new MapView({
-                container: "viewDiv",
-                map: map,
-                center: [-82.137, 29.187],
-                zoom: 10
-            });
+            // Add layers to the map (assuming these layers are already in your Experience Builder map)
+            const layers = map.layers.items;
 
-            const layers = [
-                new FeatureLayer({ url: "https://services1.arcgis.com/0MgPBoZpy1Db2sAl/arcgis/rest/services/Parcels_Copy_Zonin_FLUM_/FeatureServer/0" }),
-                new FeatureLayer({ url: "https://services1.arcgis.com/0MgPBoZpy1Db2sAl/arcgis/rest/services/Parcels_Marion_County/FeatureServer/0" }),
-                new FeatureLayer({ url: "https://services1.arcgis.com/0MgPBoZpy1Db2sAl/arcgis/rest/services/RAC_22_Locations/FeatureServer/0" })
-            ];
-
-            layers.forEach(layer => map.add(layer));
-
+            // Generate shareable link
             document.getElementById("generateLinkButton").onclick = function () {
                 let visibleLayers = layers.filter(layer => layer.visible).map(layer => layer.url).join(";");
                 let shareLink = `${window.location.href.split('?')[0]}?showLayers=${encodeURIComponent(visibleLayers)}`;
                 document.getElementById("shareLink").value = shareLink;
             };
+
+            // Apply layer visibility based on URL parameters
+            document.addEventListener("DOMContentLoaded", function() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const showLayersParam = urlParams.get('showLayers');
+
+                if (showLayersParam) {
+                    const layerUrls = showLayersParam.split(';').map(decodeURIComponent);
+                    layers.forEach(layer => {
+                        layer.visible = layerUrls.includes(layer.url);
+                    });
+                }
+            });
         });
     </script>
 </body>
 </html>
+
