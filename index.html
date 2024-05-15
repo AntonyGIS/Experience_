@@ -29,29 +29,42 @@
         require([
             "esri/Map",
             "esri/views/MapView",
-            "esri/layers/FeatureLayer"
-        ], function (Map, MapView, FeatureLayer) {
-            // Reference to the map in Experience Builder
-            const parentWindow = window.parent;
-            const mapView = parentWindow.__activeMapView;
-            const map = mapView.map;
+            "esri/layers/FeatureLayer",
+            "esri/portal/PortalItem"
+        ], function (Map, MapView, FeatureLayer, PortalItem) {
+            const map = new Map({
+                basemap: "topo-vector"
+            });
 
-            const layers = map.layers.items;
+            const view = new MapView({
+                container: "viewDiv",
+                map: map,
+                center: [-82.137, 29.187],
+                zoom: 10
+            });
 
-            document.getElementById("generateLinkButton").onclick = function () {
-                let visibleLayers = layers.filter(layer => layer.visible).map(layer => layer.id).join(";");
-                let shareLink = `${window.location.href.split('?')[0]}?showLayers=${encodeURIComponent(visibleLayers)}`;
-                document.getElementById("shareLink").value = shareLink;
-            };
+            const layers = [
+                new FeatureLayer({ url: "https://services1.arcgis.com/0MgPBoZpy1Db2sAl/arcgis/rest/services/Parcels_Copy_Zonin_FLUM_/FeatureServer/0" }),
+                new FeatureLayer({ url: "https://services1.arcgis.com/0MgPBoZpy1Db2sAl/arcgis/rest/services/Parcels_Marion_County/FeatureServer/0" }),
+                new FeatureLayer({ url: "https://services1.arcgis.com/0MgPBoZpy1Db2sAl/arcgis/rest/services/RAC_22_Locations/FeatureServer/0" })
+            ];
 
-            document.addEventListener("DOMContentLoaded", function() {
+            layers.forEach(layer => map.add(layer));
+
+            view.when(() => {
+                document.getElementById("generateLinkButton").onclick = function () {
+                    let visibleLayers = layers.filter(layer => layer.visible).map(layer => layer.url).join(";");
+                    let shareLink = `${window.location.href.split('?')[0]}?showLayers=${encodeURIComponent(visibleLayers)}`;
+                    document.getElementById("shareLink").value = shareLink;
+                };
+
                 const urlParams = new URLSearchParams(window.location.search);
                 const showLayersParam = urlParams.get('showLayers');
 
                 if (showLayersParam) {
-                    const layerIds = showLayersParam.split(';').map(decodeURIComponent);
+                    const layerUrls = showLayersParam.split(';').map(decodeURIComponent);
                     layers.forEach(layer => {
-                        layer.visible = layerIds.includes(layer.id);
+                        layer.visible = layerUrls.includes(layer.url);
                     });
                 }
             });
@@ -59,5 +72,6 @@
     </script>
 </body>
 </html>
+
 
 
