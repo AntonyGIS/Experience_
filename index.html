@@ -31,30 +31,27 @@
             "esri/views/MapView",
             "esri/layers/FeatureLayer"
         ], function (Map, MapView, FeatureLayer) {
-            // This will get the map from the parent window (Experience Builder)
+            // Reference to the map in Experience Builder
             const parentWindow = window.parent;
             const mapView = parentWindow.__activeMapView;
             const map = mapView.map;
 
-            // Add layers to the map (assuming these layers are already in your Experience Builder map)
             const layers = map.layers.items;
 
-            // Generate shareable link
             document.getElementById("generateLinkButton").onclick = function () {
-                let visibleLayers = layers.filter(layer => layer.visible).map(layer => layer.url).join(";");
+                let visibleLayers = layers.filter(layer => layer.visible).map(layer => layer.id).join(";");
                 let shareLink = `${window.location.href.split('?')[0]}?showLayers=${encodeURIComponent(visibleLayers)}`;
                 document.getElementById("shareLink").value = shareLink;
             };
 
-            // Apply layer visibility based on URL parameters
             document.addEventListener("DOMContentLoaded", function() {
                 const urlParams = new URLSearchParams(window.location.search);
                 const showLayersParam = urlParams.get('showLayers');
 
                 if (showLayersParam) {
-                    const layerUrls = showLayersParam.split(';').map(decodeURIComponent);
+                    const layerIds = showLayersParam.split(';').map(decodeURIComponent);
                     layers.forEach(layer => {
-                        layer.visible = layerUrls.includes(layer.url);
+                        layer.visible = layerIds.includes(layer.id);
                     });
                 }
             });
@@ -62,4 +59,5 @@
     </script>
 </body>
 </html>
+
 
