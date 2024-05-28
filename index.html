@@ -1,95 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Layer Visibility URL Generator</title>
-    <script src="https://js.arcgis.com/4.19/"></script>
-    <style>
-        html, body, #viewDiv {
-            height: 100%;
-            width: 100%;
-            margin: 0;
-            padding: 0;
-        }
-        #generateLinkButton {
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
-            padding: 10px 20px;
-            font-size: 16px;
-        }
-        #shareLink {
-            position: absolute;
-            top: 50px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
-            padding: 10px;
-            font-size: 16px;
-            width: 80%;
-        }
-        #layerListDiv {
-            position: absolute;
-            top: 100px;
-            left: 10px;
-            z-index: 10;
-            background: white;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 0 5px rgba(0,0,0,0.3);
-        }
-    </style>
+    <title>Image Switcher</title>
 </head>
+
 <body>
-    <div id="viewDiv"></div>
-    <div id="layerListDiv"></div>
-    <input type="text" id="shareLink" placeholder="Generated URL will appear here" readonly>
-    <button id="generateLinkButton">Generate Shareable Link</button>
+    <div id="imageContainer" style="width: 700px; height: 200px; overflow: hidden;">
+        <img id="switchingImage" src="https://www.marionfl.org/home/showpublishedimage/24416/638255272671670000"
+            alt="Image" style="width: 100%;">
+    </div>
 
     <script>
-        require([
-            "esri/Map",
-            "esri/views/MapView",
-            "esri/WebMap",
-            "esri/widgets/LayerList"
-        ], function (Map, MapView, WebMap, LayerList) {
-            const webMapId = "99059745ff81489695dbb6dcb27bb070";
-            const apiKey = "AAPK7b0da9d44a0242cdac84322818797967XznKuUGOHqSBXtWPRx8UkUbf856rRbcc4nAE0Y9jtx44FCPeHlgDaJGngilAOZGI";
+        var images = [
+            'https://www.marionfl.org/home/showpublishedimage/24416/638255272671670000',
+            'https://www.marionfl.org/home/showpublishedimage/22636/637484008075430000'
+        ];
+        var currentIndex = 0;
+        var imageElement = document.getElementById('switchingImage');
 
-            const map = new WebMap({
-                portalItem: {
-                    id: webMapId
-                },
-                apiKey: apiKey
-            });
-
-            const view = new MapView({
-                container: "viewDiv",
-                map: map,
-                center: [-82.137, 29.187],
-                zoom: 10
-            });
-
-            const layerList = new LayerList({
-                view: view
-            });
-
-            view.ui.add(layerList, {
-                position: "top-right"
-            });
-
-            document.getElementById("generateLinkButton").onclick = function () {
-                const visibleLayers = map.layers.filter(layer => layer.visible).map(layer => layer.url).join(";");
-                const shareLink = `${window.location.href.split('?')[0]}?showLayers=${encodeURIComponent(visibleLayers)}`;
-                document.getElementById("shareLink").value = shareLink;
-            };
-        });
+        setInterval(function () {
+            currentIndex = (currentIndex + 1) % images.length;
+            imageElement.src = images[currentIndex];
+        }, 5000); // 5000ms = 5 seconds
     </script>
 </body>
+
 </html>
+
 
 
 
